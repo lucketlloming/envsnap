@@ -34,6 +34,16 @@ def test_sensitive_key_info():
     assert any(i["key"] == "DB_PASSWORD" and i["severity"] == "info" for i in issues)
 
 
+def test_multiple_issues_same_snapshot():
+    """Ensure multiple keys with issues are all reported."""
+    with _patch({"DB_PASSWORD": "secret", "MY_VAR": "", "API_TOKEN": "  tok  "}):
+        issues = lint_snapshot("snap")
+    keys_with_issues = {i["key"] for i in issues}
+    assert "DB_PASSWORD" in keys_with_issues
+    assert "MY_VAR" in keys_with_issues
+    assert "API_TOKEN" in keys_with_issues
+
+
 def test_format_no_issues():
     report = format_lint_report("snap", [])
     assert "no issues" in report
