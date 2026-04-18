@@ -50,6 +50,15 @@ def test_rename_destination_exists():
             rename_snapshot("old", "new")
 
 
+def test_rename_same_name_raises():
+    """Renaming a snapshot to its own name should raise SnapshotAlreadyExistsError."""
+    patches = _patch(src_exists=True, dst_exists=True)
+    with patches[0], patches[1], patches[2], patches[3], \
+         patches[4], patches[5], patches[6], patches[7]:
+        with pytest.raises(SnapshotAlreadyExistsError):
+            rename_snapshot("old", "old")
+
+
 def test_update_aliases_renames_target():
     from envsnap.rename import _update_aliases
     aliases = {"a": "old", "b": "other"}
@@ -59,6 +68,16 @@ def test_update_aliases_renames_target():
         assert aliases["a"] == "new"
         assert aliases["b"] == "other"
         mock_save.assert_called_once()
+
+
+def test_update_aliases_no_match_does_not_save():
+    """_update_aliases should not save when no alias points to the old name."""
+    from envsnap.rename import _update_aliases
+    aliases = {"a": "other", "b": "unrelated"}
+    with patch("envsnap.rename._load_aliases", return_value=aliases), \
+         patch("envsnap.rename._save_aliases") as mock_save:
+        _update_aliases("old", "new")
+        mock_save.assert_not_called()
 
 
 def test_update_profiles_renames_member():
