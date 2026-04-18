@@ -58,6 +58,13 @@ def test_alias_remove(runner, isolated_snapshot_dir):
     assert "removed" in result.output
 
 
+def test_alias_remove_missing(runner, isolated_snapshot_dir):
+    """Removing a non-existent alias should fail with a meaningful message."""
+    result = runner.invoke(alias_cmd, ["remove", "nonexistent"])
+    assert result.exit_code != 0
+    assert "nonexistent" in result.output
+
+
 def test_alias_list(runner, isolated_snapshot_dir):
     _snap("x")
     _snap("y")
@@ -66,3 +73,10 @@ def test_alias_list(runner, isolated_snapshot_dir):
     result = runner.invoke(alias_cmd, ["list"])
     assert "ax -> x" in result.output
     assert "ay -> y" in result.output
+
+
+def test_alias_list_empty(runner, isolated_snapshot_dir):
+    """Listing aliases when none are defined should succeed and produce no alias entries."""
+    result = runner.invoke(alias_cmd, ["list"])
+    assert result.exit_code == 0
+    assert "->" not in result.output
