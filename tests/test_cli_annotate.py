@@ -57,6 +57,13 @@ def test_annotate_remove(runner):
     assert annotate.get_annotations("snap1") == {}
 
 
+def test_annotate_remove_missing_key(runner):
+    """Removing a key that does not exist should exit with an error."""
+    result = runner.invoke(annotate_cmd, ["remove", "snap1", "nonexistent"])
+    assert result.exit_code == 1
+    assert "nonexistent" in result.output
+
+
 def test_annotate_clear(runner):
     annotate.set_annotation("snap1", "a", "1")
     annotate.set_annotation("snap1", "b", "2")
