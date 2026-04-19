@@ -32,6 +32,15 @@ def test_schedule_set_with_keys(runner):
     assert entry["keys"] == ["API_KEY", "DB_URL"]
 
 
+def test_schedule_set_overwrites_existing(runner):
+    """Setting a schedule for an existing project should update it in place."""
+    sched.set_schedule("proj", "daily")
+    result = runner.invoke(schedule_cmd, ["set", "proj", "--interval", "weekly"])
+    assert result.exit_code == 0
+schedule("proj")
+    assert entry["interval"] == "weekly"
+
+
 def test_schedule_remove(runner):
     sched.set_schedule("proj", "weekly")
     result = runner.invoke(schedule_cmd, ["remove", "proj"])
