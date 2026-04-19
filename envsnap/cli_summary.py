@@ -28,7 +28,8 @@ def summary_show(name: str, fmt: str):
 
 @summary_cmd.command("all")
 @click.option("--format", "fmt", default="text", type=click.Choice(["text", "json"]), show_default=True)
-def summary_all(fmt: str):
+@click.option("--separator", default="---", show_default=True, help="Separator line between summaries in text mode.")
+def summary_all(fmt: str, separator: str):
     """Show summaries for all snapshots."""
     summaries = summarize_all()
     if not summaries:
@@ -39,4 +40,4 @@ def summary_all(fmt: str):
     else:
         for s in summaries:
             click.echo(format_summary(s))
-            click.echo("---")
+            click.echo(separator)
