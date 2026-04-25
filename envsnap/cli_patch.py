@@ -9,11 +9,11 @@ def patch_cmd():
     pass
 
 
-@patch_cmd.command("set", help="Set one or more KEY=VALUE pairs in a snapshot.")
-@click.argument("name")
-@click.argument("pairs", nargs=-1, required=True, metavar="KEY=VALUE...")
-def patch_set(name: str, pairs: tuple):
-    """Set KEY=VALUE pairs in snapshot NAME."""
+def _parse_key_value_pairs(pairs: tuple) -> dict:
+    """Parse an iterable of 'KEY=VALUE' strings into a dictionary.
+
+    Raises click.BadParameter if any pair is not in KEY=VALUE format.
+    """
     updates = {}
     for pair in pairs:
         if "=" not in pair:
@@ -23,6 +23,15 @@ def patch_set(name: str, pairs: tuple):
             )
         k, v = pair.split("=", 1)
         updates[k] = v
+    return updates
+
+
+@patch_cmd.command("set", help="Set one or more KEY=VALUE pairs in a snapshot.")
+@click.argument("name")
+@click.argument("pairs", nargs=-1, required=True, metavar="KEY=VALUE...")
+def patch_set(name: str, pairs: tuple):
+    """Set KEY=VALUE pairs in snapshot NAME."""
+    updates = _parse_key_value_pairs(pairs)
 
     try:
         changed = patch_snapshot(name, set_keys=updates)
