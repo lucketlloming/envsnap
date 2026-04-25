@@ -77,3 +77,15 @@ def test_summary_all_empty(runner):
         result = runner.invoke(summary_cmd, ["all"])
     assert result.exit_code == 0
     assert "No snapshots" in result.output
+
+
+def test_summary_all_lists_snapshots(runner):
+    """Test that 'all' subcommand displays each snapshot name in output."""
+    snapshot_names = ["snap1", "snap2", "snap3"]
+    patches = _patch(name="snap1")
+    with patch("envsnap.summary.list_snapshots", return_value=snapshot_names), \
+            patches[0], patches[1], patches[2], patches[3]:
+        result = runner.invoke(summary_cmd, ["all"])
+    assert result.exit_code == 0
+    for name in snapshot_names:
+        assert name in result.output
