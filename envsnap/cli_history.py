@@ -13,6 +13,10 @@ from envsnap.history import get_history, clear_history, format_history_report
 def history_cmd(snapshot_name, fmt):
     """Show history of actions for snapshots."""
     entries = get_history(snapshot_name)
+    if not entries:
+        name_hint = f" for '{snapshot_name}'" if snapshot_name else ""
+        click.echo(f"No history entries found{name_hint}.")
+        return
     if fmt == "json":
         click.echo(json.dumps(entries, indent=2))
     else:
