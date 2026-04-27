@@ -83,6 +83,37 @@ def diffcmd(name: str) -> None:
         click.echo(change)
 
 
+@cli.command()
+@click.argument("a")
+@click.argument("b")
+def compare(a: str, b: str) -> None:
+    """Compare two snapshots A and B and show their differences."""
+    try:
+        data_a = load_snapshot(a)
+    except FileNotFoundError:
+        raise click.ClickException(f"Snapshot '{a}' not found.")
+    try:
+        data_b = load_snapshot(b)
+    except FileNotFoundError:
+        raise click.ClickException(f"Snapshot '{b}' not found.")
+
+    keys = sorted(set(data_a) | set(data_b))
+    differences = []
+    for k in keys:
+        if k not in data_b:
+            differences.append(f"- {k}={data_a[k]!r}  (only in '{a}')")
+        elif k not in data_a:
+            differences.append(f"+ {k}={data_b[k]!r}  (only in '{b}')")
+        elif data_a[k] != data_b[k]:
+            differences.append(f"~ {k}: {data_a[k]!r} -> {data_b[k]!r}")
+
+    if not differences:
+        click.echo("Snapshots are identical.")
+    else:
+        for line in differences:
+            click.echo(line)
+
+
 cli.add_command(export_cmd)
 cli.add_command(import_cmd)
 
